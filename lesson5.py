@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Protocol
 import json
@@ -100,7 +101,9 @@ class UserSerializer:
     def save(obj: Serializer):
         print(obj.to_json())
 
-
+# -------------------------------
+# ProductSerializer 
+# -------------------------------
 class ProductSerializer:
     @staticmethod
     def save(obj: Serializer):
@@ -115,6 +118,47 @@ class Product:
         return isinstance(value, Product) and self.name == value.name and self.price == value.price
     def __lt__(self, other):
         return self.price < other.price
+   
+#-----------# -------------------------------
+# Abstract Repository
+# ------------------------------- 
+class Repository(ABC):
+    @abstractmethod
+    def save(self, obj: Serializer): ...
+    
+    @abstractmethod
+    def get(self, id: int): ...
+    
+# -----------------
+# -------------------------------
+# InMemoryRepository
+# -------------------------------
+class InMemoryRepository(Repository):
+    def __init__(self):
+        self.data = []
+    
+    def save(self, obj: Serializer):
+        self.data.append(obj)
+    
+    def get(self, id: int):
+        return self.data[id]
+    
+class PriceMixin:
+    def price_with_tax(self, tax):
+        return self.price * (1 + tax)
+    
+@dataclass
+class Item:
+    name: str
+    price: float
+    
+class StoreItem(PriceMixin):
+    def __init__(self, name, price):
+        self.item = Item(name, price)
+        self.price = price
+    
+    def __repr__(self):
+        return f"StoreItem(name={self.item.name}, price={self.price})"
     
 # -------------------------------
 # Demo
@@ -149,3 +193,22 @@ if __name__ == "__main__":
     p2 = Product("Book", 15)
     print(p == p2)
     print(p < p2)
+    
+    repo = InMemoryRepository()
+    repo.save(u)
+    repo.save(u2)
+    repo.save(p)
+    repo.save(p2)
+    print(repo.get(0))
+    print(repo.get(1))
+    print(repo.get(2))
+    print(repo.get(3))
+
+    repo.save(Product("Book", 10))
+    repo.save(Product("Book", 15))
+    print(repo.get(4))
+    print(repo.get(5))
+
+    item = StoreItem("Book", 10)
+    print(item)
+    print(item.price_with_tax(0.1))
