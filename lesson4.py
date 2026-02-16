@@ -1,47 +1,54 @@
-class User:
-    def __init__(self, name, age, active=True):
+class Product:
+    def __init__(self, name: str, price: float, stock: int = 0):
         self.name = name
-        self.age = age
-        self.active = active
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "age": self.age,
-            "active": self.active
-        }
-    
-    def __str__(self):
-        return f"{self.name} ({self.age} years old)"
+        self.price = price
+        self.stock = stock
         
-class UserManager:
-    def __init__(self, users):
-        self.users = users
-
-    def get_active_usernames(self):
-        return [u.name.upper() for u in self.users if u.active]
-
-    def get_sorted_by_age(self, descending=False):
-        return sorted(self.users, key=lambda u: u.age, reverse=descending)
-
-    def get_stats(self):
-        ages = [u.age for u in self.users]
-        return {
-            "average_age": sum(ages) / len(ages),
-            "min_age": min(ages),
-            "max_age": max(ages),
-            "active_count": sum(u.active for u in self.users)
-        }
+    def is_available(self) -> bool:
+        return self.stock > 0
     
-if __name__ == "__main__":
-    users = [
-        User("Alice", 30),
-        User("Bob", 25, active=False),
-        User("Charlie", 35),
-        User("Diana", 28)
-    ]
-    manager = UserManager(users)
+    def __str__(self) -> str:
+        status = "In stock" if self.is_available() else "Out of stock"
+        return f"{self.name}: ${self.price} ({status})"
 
-    print(manager.get_active_usernames())
-    print(manager.get_sorted_by_age())
-    print(manager.get_stats())
+
+class Store:
+    def __init__(self, products: list[Product]):
+        self.products = products
+
+    def get_available_products(self) -> list[Product]:
+        return [p for p in self.products if p.is_available()]
+    
+    def get_cheapest_products(self, n: int = 3) -> list[Product]:
+        return sorted(self.products, key=lambda p: p.price)[:n]
+    
+    def search(self, query: str) -> list[Product]:
+        q = query.lower()
+        return [p for p in self.products if q in p.name.lower()]
+    
+    def total_stock_value(self) -> float:
+        return sum(p.price * p.stock for p in self.products)
+      
+if __name__ == "__main__":
+    products = [
+        Product("Laptop", 1000, 5),
+        Product("Smartphone", 500, 10),
+        Product("Tablet", 300, 0),
+        Product("Headphones", 100, 15),
+        Product("Smartwatch", 200, 8),
+    ]
+    store = Store(products)
+
+    print("Available products:")
+    for product in store.get_available_products():
+        print(product)
+
+    print("\nCheapest products:")
+    for product in store.get_cheapest_products(1):
+        print(product)
+
+    print("\nSearch results for 'smart':")
+    for product in store.search("smart"):
+        print(product)
+
+    print(f"\nTotal stock value: ${store.total_stock_value()}")
