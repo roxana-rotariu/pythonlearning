@@ -1,0 +1,3 @@
+Salut!
+Acesta este un fișier text.
+Învățăm Python.
