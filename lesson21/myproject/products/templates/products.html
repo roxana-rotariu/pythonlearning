@@ -1,0 +1,11 @@
+<h1>Lista Produse</h1>
+
+<ul>
+  {% for product in products %}
+    <li>
+      {{ product.name }} - {{ product.price }}
+      <!-- Link pentru aplicarea discount-ului -->
+      <a href="{% url 'discount_product' product.pk %}">Aplică 10% reducere</a>
+    </li>
+  {% endfor %}
+</ul>
